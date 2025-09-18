@@ -5,19 +5,18 @@ params = struct();
 
 % Model identifier, one of 'A', 'B', 'C', 'D', or 'E', corresponding to the
 % accompanying publication.
-params.model = 'A';
+params.model = 'E';
 
 % Time and discretisation.
-params.tFinal = 30; % Final time.
+params.tFinal = 20; % Final time.
 params.nR = 2000; % Number of points in the spatial discretisation.
 params.nT = 3000; % Number of points in the temporal discretisation.
 
 % Material parameters.
-params.mu = 1; % Shear modulus of the tumour material.
-params.kappa = 0; % Spring constant in the radial stress boundary condition.
+params.kappa = 1; % Spring constant in the radial stress boundary condition.
 
 % Growth rate parameters.
-params.k = 1; % The basic growth rate constant.
+params.k = 5; % The basic growth rate constant.
 params.sigmaHat = -1; % Threshold below which growth is arrested due to compressive stress, if included in the model.
 params.beta = 1; % Scale factor for the local argument of n, if included in the model.
 
@@ -39,15 +38,32 @@ params.T = 1 / (params.k * params.cInf);
 params.radialStressIntegrandThreshold = 0.05; % Radial threshold for using Taylor expansion of radial stress integrand.
 params.elasticStretchIntegrandThreshold = 0.05; % Radial threshold for using Taylor expansion of of elastic stretch integrand.
 
+
+params1 = params;
+params2 = params;
+
+params1.mu = 1; % Shear modulus of the tumour material.
+params1.varsigma = 0;
+params2.mu = 0.5; % Shear modulus of the tumour material.
+params2.varsigma = 0.5;
+
+
 %% Run the simulation.
-output = runSim(params);
+outputElastic = runSimViscoManser(params1);
+outputVisco = runSimViscoManser(params2);
 
 %% Plotting.
-plot_spheroid(output, 1);
-plot_spheroid(output, params.nT);
-plot_evolution(output);
+%plot_spheroid_pair(outputElastic, outputVisco, 'Elastic', 'Viscoelastic', 1);
+plot_spheroid_pair(outputElastic, outputVisco, 'Elastic', 'Viscoelastic',params.nT);
+plot_evolution_pair(outputElastic, outputVisco,'Elastic', 'Viscoelastic');
+plot_boundary_stress_pair(outputElastic, outputVisco,'Elastic', 'Viscoelastic');
+
+%plot_spheroid(output, params.nT);
+%plot_evolution(output);
+%make_spheroid_video(output,10,10,'spheroid_growth_E_high_res.mp4');  
 
 %% Saving.
+output = outputVisco;
 
 % Generate reduced output.
 reducedOutput = struct();
@@ -65,4 +81,4 @@ reducedOutput.params = params;
 reducedOutput.necroticRadii = output.necroticRadii;
 
 % save('output.mat','output')
-save('reducedOutputElastic.mat','reducedOutput')
+save('reducedOutputVisco.mat','reducedOutput')

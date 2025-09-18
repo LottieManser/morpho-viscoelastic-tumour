@@ -5,19 +5,20 @@ params = struct();
 
 % Model identifier, one of 'A', 'B', 'C', 'D', or 'E', corresponding to the
 % accompanying publication.
-params.model = 'A';
+params.model = 'E';
 
 % Time and discretisation.
-params.tFinal = 30; % Final time.
+params.tFinal = 5; % Final time.
 params.nR = 2000; % Number of points in the spatial discretisation.
 params.nT = 3000; % Number of points in the temporal discretisation.
 
 % Material parameters.
 params.mu = 1; % Shear modulus of the tumour material.
+params.varsigma = 5; % MANSER VISCO BIT
 params.kappa = 0; % Spring constant in the radial stress boundary condition.
 
 % Growth rate parameters.
-params.k = 1; % The basic growth rate constant.
+params.k = 5; % The basic growth rate constant.
 params.sigmaHat = -1; % Threshold below which growth is arrested due to compressive stress, if included in the model.
 params.beta = 1; % Scale factor for the local argument of n, if included in the model.
 
@@ -35,17 +36,20 @@ params.B = params.L; % Initial (and unstressed) radius of the spheroid.
 % Timescale
 params.T = 1 / (params.k * params.cInf);
 
+
+
 % Constant thresholds for Taylor expanding integrals.
 params.radialStressIntegrandThreshold = 0.05; % Radial threshold for using Taylor expansion of radial stress integrand.
 params.elasticStretchIntegrandThreshold = 0.05; % Radial threshold for using Taylor expansion of of elastic stretch integrand.
 
 %% Run the simulation.
-output = runSim(params);
+output = runSimViscoManser(params);
 
 %% Plotting.
 plot_spheroid(output, 1);
 plot_spheroid(output, params.nT);
 plot_evolution(output);
+%make_spheroid_video(output,10,10,'spheroid_growth_E_high_res.mp4');  
 
 %% Saving.
 
@@ -65,4 +69,4 @@ reducedOutput.params = params;
 reducedOutput.necroticRadii = output.necroticRadii;
 
 % save('output.mat','output')
-save('reducedOutputElastic.mat','reducedOutput')
+save('reducedOutputVisco.mat','reducedOutput')

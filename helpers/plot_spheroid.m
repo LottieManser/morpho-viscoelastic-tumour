@@ -39,7 +39,7 @@ for i = 1 : length(shaders)
     % Shade.
     pcolor(xs,ys,vals)
     shading interp
-    colormap(viridis)
+    %colormap(viridis)
     c = colorbar;
     set(c,'TickLabelInterpreter','latex')
     % Outer radius.
