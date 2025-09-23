@@ -20,6 +20,7 @@ function output = runSimViscoManser(params, progressFlag)
     viscoelasticStretches = zeros(params.nT,params.nR);
     nutrients = zeros(params.nT,params.nR);
     necroticRadii = zeros(params.nT,1)-Inf;
+    densities = zeros(params.nT, params.nR);  % NEW
 
     if progressFlag
         clear('textprogressbar.m')
@@ -65,6 +66,10 @@ function output = runSimViscoManser(params, progressFlag)
             growthRates(tInd,:) = modelEGrowthRate(nutrients(tInd,:),rs(tInd,:),necroticRadii(tInd),radialStresses(tInd,:),hoopStresses(tInd,:),params);
         end
 
+        % Compute densities just to save, doesn't affect anything
+        densities(tInd,:) = 1 ./ (growthStretches(tInd,:).^3);  % NEW
+
+
         %% If there will be a next step
         if tInd < params.nT
 
@@ -88,7 +93,6 @@ function output = runSimViscoManser(params, progressFlag)
             % Timestep growth stretch from tInd to tInd+1 using the mapped quantities.
             growthStretches(tInd+1,:) = growthStretchRemapped + ...
                                         (ts(tInd+1) - ts(tInd)) * growthStretchRemapped .* growthRateRemapped;
-
             % Update finite difference derivative for the new step
             dgrowthStretchesdt(tInd+1,:) = (growthStretches(tInd+1,:) - growthStretches(tInd,:)) / ...
                                         (ts(tInd+1) - ts(tInd));
@@ -118,5 +122,7 @@ function output = runSimViscoManser(params, progressFlag)
     output.nutrients = nutrients;
     output.necroticRadii = necroticRadii;
     output.params = params;
+    output.densities = densities; %NEW
+
 
 end

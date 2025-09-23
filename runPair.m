@@ -13,10 +13,10 @@ params.nR = 2000; % Number of points in the spatial discretisation.
 params.nT = 3000; % Number of points in the temporal discretisation.
 
 % Material parameters.
-params.kappa = 1; % Spring constant in the radial stress boundary condition.
+params.kappa = 0; % Spring constant in the radial stress boundary condition.
 
 % Growth rate parameters.
-params.k = 5; % The basic growth rate constant.
+params.k = 1; % The basic growth rate constant.
 params.sigmaHat = -1; % Threshold below which growth is arrested due to compressive stress, if included in the model.
 params.beta = 1; % Scale factor for the local argument of n, if included in the model.
 
@@ -41,6 +41,8 @@ params.elasticStretchIntegrandThreshold = 0.05; % Radial threshold for using Tay
 
 params1 = params;
 params2 = params;
+
+%% Pick run specific parameters
 
 params1.mu = 1; % Shear modulus of the tumour material.
 params1.varsigma = 0;
