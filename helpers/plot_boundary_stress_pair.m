@@ -1,55 +1,72 @@
 function plot_boundary_stress_pair(output1, output2, label_1, label_2)
-% Plot the evolution of spheroid radii for two outputs on the same axes.
+% Plot evolution of radial stress:
+% Rows:
+%   Row 1: simulation 1
+%   Row 2: simulation 2
+% Columns:
+%   (1) outer boundary
+%   (2) necrotic boundary
+%   (3) centre
 
-    figure
-    hold on
+figure
+tlo = tiledlayout(2,3,'TileSpacing','compact','Padding','compact');
 
-    % Time normalized
-    t1 = output1.ts / output1.params.T;
-    t2 = output2.ts / output2.params.T;
+% Time normalized
+t1 = output1.ts / output1.params.T;
+t2 = output2.ts / output2.params.T;
 
-    % Outer radius: solid lines
-    plot(t1, output1.radialStresses(:,end) / output1.params.L, 'k-', 'LineWidth', 1.5)              % Output 1: black
-    plot(t2, output2.radialStresses(:,end) / output2.params.L, 'Color', 0.5*[1 1 1], 'LineWidth', 1.5) % Output 2: gray
-
-    % Necrotic radius: dashed lines
-    plot(t1, output1.necroticRadii / output1.params.L, 'k-', 'LineStyle','--', 'LineWidth', 1.5) % Output 1: light gray dashed
-    plot(t2, output2.necroticRadii / output2.params.L, 'Color', 0.5*[1 1 1], 'LineStyle','--', 'LineWidth', 1.5) % Output 2: darker gray dashed
-
-    % Optional nutrient-free radius (if exists)
-    hasNutrientFree = false;
-    if any(output1.nutrients(:) == 0) || any(output2.nutrients(:) == 0)
-        hasNutrientFree = true;
-
-        % Output 1
-        nutrientsTemp1 = output1.nutrients; nutrientsTemp1(output1.nutrients > 0) = 1;
-        [~,zeroNutrientInds1] = max(nutrientsTemp1,[],2,'linear');
-        plot(t1, output1.radialStresses(zeroNutrientInds1)/output1.params.L, 'Color', 0.7*[1,1,1], 'LineStyle','-.', 'LineWidth', 1)
-
-        % Output 2
-        nutrientsTemp2 = output2.nutrients; nutrientsTemp2(output2.nutrients > 0) = 1;
-        [~,zeroNutrientInds2] = max(nutrientsTemp2,[],2,'linear');
-        plot(t2, output2.rs(zeroNutrientInds2)/output2.params.L, 'Color', 0.4*[1,1,1], 'LineStyle','-.','LineWidth', 1)
+%% ---------- Helper: necrotic stress ----------
+    function sigN = necroticStress(output,t)
+        sigN = nan(size(t));
+        for k = 1:numel(t)
+            rn = output.necroticRadii(k);
+            if isfinite(rn)
+                [~,idx] = min(abs(output.rs(k,:) - rn));
+                sigN(k) = output.radialStresses(k,idx);
+            end
+        end
     end
 
-    % Legend
-    if hasNutrientFree
-        legendEntries = { ...
-            strcat('Outer radius ', label_1), strcat('Outer radius ', label_2), ...
-            strcat('Necrotic radius ', label_1), strcat('Necrotic radius ', label_2), ...
-            strcat('Nutrient-free radius ', label_1), strcat('Nutrient-free radius ', label_2) ...
-        };
-    else
-        legendEntries = { ...
-            strcat('Outer radius ', label_1), strcat('Outer radius ', label_2), ...
-            strcat('Necrotic radius ', label_1), strcat('Necrotic radius ', label_2) ...
-        };
-    end
+sigN1 = necroticStress(output1,t1);
+sigN2 = necroticStress(output2,t2);
 
-    legend(legendEntries, 'Location', 'southeast')
-    box on
-    xlabel('$t/T$', 'Interpreter', 'latex')
-    ylabel('$r/L$', 'Interpreter', 'latex')
-    title('Spheroid stress at boundary evolution')
+%% ---------- Row 1: simulation 1 ----------
+nexttile(1)
+plot(t1, output1.radialStresses(:,end) / output1.params.L, ...
+    'k-', 'LineWidth',1.5)
+title('Outer boundary')
+ylabel({label_1,'$\sigma_r$'},'Interpreter','latex','FontWeight','bold')
+box on
+
+nexttile(2)
+plot(t1, sigN1 / output1.params.L, 'k-', 'LineWidth',1.5)
+title('Necrotic boundary')
+box on
+
+nexttile(3)
+plot(t1, output1.radialStresses(:,1) / output1.params.L, ...
+    'k-', 'LineWidth',1.5)
+title('Centre')
+box on
+
+%% ---------- Row 2: simulation 2 ----------
+nexttile(4)
+plot(t2, output2.radialStresses(:,end) / output2.params.L, ...
+    'Color',0.5*[1 1 1], 'LineWidth',1.5)
+ylabel({label_2,'$\sigma_r$'},'Interpreter','latex','FontWeight','bold')
+xlabel('$t/T$','Interpreter','latex')
+box on
+
+nexttile(5)
+plot(t2, sigN2 / output2.params.L, ...
+    'Color',0.5*[1 1 1], 'LineWidth',1.5)
+xlabel('$t/T$','Interpreter','latex')
+box on
+
+nexttile(6)
+plot(t2, output2.radialStresses(:,1) / output2.params.L, ...
+    'Color',0.5*[1 1 1], 'LineWidth',1.5)
+xlabel('$t/T$','Interpreter','latex')
+box on
 
 end
